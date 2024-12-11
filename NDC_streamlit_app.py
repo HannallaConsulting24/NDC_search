@@ -17,8 +17,16 @@ data['NDC'] = data['NDC'].astype(str).str.strip()
 ndc_frequency = data['NDC'].value_counts()
 ndc_options = sorted(data['NDC'].unique(), key=lambda x: -ndc_frequency.get(x, 0))
 
-# Streamlit app starts here
-st.title("Medication Search Tool 💊")
+# Display logo and title
+logo_path = "img.png"  # Path to the uploaded logo
+
+# Use columns for better alignment
+col1, col2 = st.columns([1, 4])  # Adjust column widths
+with col1:
+    st.image(logo_path, use_column_width=True)
+with col2:
+    st.title("CDI Medication Guiding Tool 💊")
+    
 st.markdown("### Search by NDC Code and Insurance")
 
 # Fetch unique values for dropdowns and sort Insurance options based on the selected NDC
