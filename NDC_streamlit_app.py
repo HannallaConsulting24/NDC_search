@@ -66,10 +66,13 @@ if ndc_input:
             with right_col:
                 st.subheader("Prescription Details")
                 for _, row in filtered_data.iterrows():
-                    st.markdown(f"- **Script (RX#)**: {row['RX#']}")
-                    st.markdown(f"- **R#**: {row['R#']}")
-                    st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
-                    st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
+                    col_r1, col_r2 = st.columns(2)
+                    with col_r1:
+                        st.markdown(f"- **Script (RX#)**: {row['RX#']}")
+                        st.markdown(f"- **R#**: {row['R#']}")
+                    with col_r2:
+                        st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
+                        st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
                     st.markdown(f"- **Acquisition Cost (ACQ_x)**: {row['ACQ_x']}")
                     st.markdown(f"- **Profit**: {row['Profit']}")
                     st.markdown(f"- **Gross Margin (GM)**: {row['GM']}")
