@@ -4,7 +4,7 @@ import pandas as pd
 # Load the dataset
 @st.cache_data
 def load_data():
-    file_path = 'last_dance.xlsx'
+    file_path = '/mnt/data/last_dance.xlsx'
     return pd.read_excel(file_path)
 
 # Load the data
@@ -27,37 +27,37 @@ insurance_input = st.selectbox("Select Insurance:", options=[""] + list(insuranc
 
 if ndc_input and insurance_input:
     # Filter data based on NDC and Insurance
-    filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)]
+    filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)].drop_duplicates()
 
     if not filtered_data.empty:
-        st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input} and Insurance: {insurance_input}")
+        st.success(f"Found 1 result for NDC: {ndc_input} and Insurance: {insurance_input}")
 
         # Display main details
         st.subheader("Drug Details")
-        for _, row in filtered_data.iterrows():
-            st.markdown(f"- **Drug Name**: {row['Drug Name']}")
-            st.markdown(f"- **NDC**: {row['NDC']}")
-            st.markdown(f"- **Manufacturer**: {row['MFG']}")
-            st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
-            st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-            st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
-            st.markdown(f"- **Class**: {row['Class']}")
-            st.markdown("---")
+        row = filtered_data.iloc[0]
+        st.markdown(f"- **Drug Name**: {row['Drug Name']}")
+        st.markdown(f"- **NDC**: {row['NDC']}")
+        st.markdown(f"- **Manufacturer**: {row['MFG']}")
+        st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
+        st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
+        st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
+        st.markdown(f"- **RxCui**: {row['RxCui']}")
+        st.markdown(f"- **Class**: {row['Class']}")
+        st.markdown("---")
 
         # Display alternatives based on RxCui
-        rxcui_value = filtered_data.iloc[0]['RxCui']
-        alternatives = data[(data['RxCui'] == rxcui_value) & (data['NDC'] != ndc_input)]
+        rxcui_value = row['RxCui']
+        alternatives = data[(data['RxCui'] == rxcui_value) & (data['NDC'] != ndc_input)].drop_duplicates()
 
         if not alternatives.empty:
-            st.subheader("Alternative Medications")
+            st.markdown("<h3 style='color:blue;'>Alternative Medications</h3>", unsafe_allow_html=True)
             for _, alt_row in alternatives.iterrows():
-                st.markdown(f"- **Drug Name**: {alt_row['Drug Name']}")
-                st.markdown(f"- **NDC**: {alt_row['NDC']}")
-                st.markdown(f"- **Manufacturer**: {alt_row['MFG']}")
-                st.markdown(f"- **Patient Pay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
-                st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ_y']}")
-                st.markdown(f"- **Class**: {alt_row['Class']}")
+                st.markdown(f"<div style='font-size:16px;'><strong>Drug Name:</strong> {alt_row['Drug Name']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:16px;'><strong>NDC:</strong> {alt_row['NDC']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:16px;'><strong>Manufacturer:</strong> {alt_row['MFG']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:16px;'><strong>Patient Pay:</strong> {alt_row['Pat Pay']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:16px;'><strong>Insurance Pay:</strong> {alt_row['Ins Pay']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:16px;'><strong>Acquisition Cost:</strong> {alt_row['ACQ_y']}</div>", unsafe_allow_html=True)
                 st.markdown("---")
         else:
             st.warning("No alternatives found for this RxCui.")
