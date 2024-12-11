@@ -15,31 +15,33 @@ data['NDC'] = data['NDC'].astype(str).str.strip()
 
 # Streamlit app starts here
 st.title("Medication Search Tool 💊")
-st.markdown("### Search by NDC Code")
+st.markdown("### Search by NDC Code and Insurance")
 
-# Search input
-ndc_input = st.text_input("Enter NDC Code:", placeholder="Type NDC Code here...")
+# Fetch unique values for dropdowns
+ndc_options = sorted(data['NDC'].unique())
+insurance_options = sorted(data['Ins'].dropna().unique())
 
-if ndc_input:
-    # Filter data based on NDC
-    filtered_data = data[data['NDC'] == ndc_input]
+# Search inputs
+ndc_input = st.selectbox("Select NDC Code:", options=[""] + ndc_options, format_func=lambda x: x if x else "Type or select an NDC Code...")
+insurance_input = st.selectbox("Select Insurance:", options=[""] + list(insurance_options), format_func=lambda x: x if x else "Type or select Insurance...")
+
+if ndc_input and insurance_input:
+    # Filter data based on NDC and Insurance
+    filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)]
 
     if not filtered_data.empty:
-        st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input}")
+        st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input} and Insurance: {insurance_input}")
 
         # Display main details
         st.subheader("Drug Details")
         for _, row in filtered_data.iterrows():
             st.markdown(f"- **Drug Name**: {row['Drug Name']}")
             st.markdown(f"- **NDC**: {row['NDC']}")
-            st.markdown(f"- **Form**: {row['Form']}")
-            st.markdown(f"- **Strength**: {row['Strength']}")
             st.markdown(f"- **Manufacturer**: {row['MFG']}")
             st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
             st.markdown(f"- **Class**: {row['Class']}")
-            st.markdown(f"- **Insurance**: {row['Ins']}")
             st.markdown("---")
 
         # Display alternatives based on RxCui
@@ -51,18 +53,15 @@ if ndc_input:
             for _, alt_row in alternatives.iterrows():
                 st.markdown(f"- **Drug Name**: {alt_row['Drug Name']}")
                 st.markdown(f"- **NDC**: {alt_row['NDC']}")
-                st.markdown(f"- **Form**: {alt_row['Form']}")
-                st.markdown(f"- **Strength**: {alt_row['Strength']}")
                 st.markdown(f"- **Manufacturer**: {alt_row['MFG']}")
                 st.markdown(f"- **Patient Pay**: {alt_row['Pat Pay']}")
                 st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
                 st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ_y']}")
                 st.markdown(f"- **Class**: {alt_row['Class']}")
-                st.markdown(f"- **Insurance**: {alt_row['Ins']}")
                 st.markdown("---")
         else:
             st.warning("No alternatives found for this RxCui.")
     else:
-        st.error(f"No results found for NDC: {ndc_input}")
+        st.error(f"No results found for NDC: {ndc_input} and Insurance: {insurance_input}")
 else:
-    st.info("Please enter an NDC code to search.")
+    st.info("Please select both NDC Code and Insurance to search.")
