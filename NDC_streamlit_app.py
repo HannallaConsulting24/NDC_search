@@ -4,7 +4,7 @@ import pandas as pd
 # Load the dataset
 @st.cache_data
 def load_data():
-    file_path = '/mnt/data/last_dance.xlsx'
+    file_path = 'last_dance.xlsx'
     return pd.read_excel(file_path)
 
 # Load the data
