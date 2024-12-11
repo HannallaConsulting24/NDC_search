@@ -21,26 +21,13 @@ ndc_options = sorted(data['NDC'].unique(), key=lambda x: -ndc_frequency.get(x, 0
 logo_path = "img.png"
 
 # Layout for title and logo
-st.markdown("""
-<style>
-    .title-container {
-        display: flex;
-        align-items: center;
-    }
-    .title-container img {
-        height: 60px;
-        margin-right: 15px;
-    }
-    .title-container h1 {
-        font-size: 2rem;
-        margin: 0;
-    }
-</style>
-<div class="title-container">
-    <img src=""" + logo_path + """ alt="Logo">
-    <h1>Medication Search Tool 💊</h1>
-</div>
-""", unsafe_allow_html=True)
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image(logo_path, use_container_width=True)
+with col2:
+    st.markdown("""
+    <h1 style='display: inline-block; vertical-align: middle;'>Medication Search Tool 💊</h1>
+    """, unsafe_allow_html=True)
 
 st.markdown("### Search by NDC Code and Insurance")
 
