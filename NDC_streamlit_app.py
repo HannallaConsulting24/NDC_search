@@ -36,12 +36,16 @@ ndc_input = st.selectbox("Select NDC Code:", options=[""] + ndc_options, format_
 
 if ndc_input:
     related_insurance = data[data['NDC'] == ndc_input]['Ins'].value_counts()
-    insurance_options = sorted(data['Ins'].unique(), key=lambda x: -related_insurance.get(x, 0))
+    insurance_options = ["All"] + sorted(data['Ins'].unique(), key=lambda x: -related_insurance.get(x, 0))
     insurance_input = st.selectbox("Select Insurance:", options=[""] + insurance_options, format_func=lambda x: x if x else "Type or select Insurance...")
 
     if insurance_input:
-        # Filter data based on NDC and Insurance
-        filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)].drop_duplicates()
+        if insurance_input == "All":
+            # Filter data based on NDC only
+            filtered_data = data[data['NDC'] == ndc_input].drop_duplicates()
+        else:
+            # Filter data based on NDC and Insurance
+            filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)].drop_duplicates()
 
         if not filtered_data.empty:
             st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input} and Insurance: {insurance_input}")
@@ -55,9 +59,6 @@ if ndc_input:
                     st.markdown(f"- **Drug Name**: {row['Drug Name']}")
                     st.markdown(f"- **NDC**: {row['NDC']}")
                     st.markdown(f"- **Manufacturer**: {row['MFG']}")
-                    st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
-                    st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-                    st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
                     st.markdown(f"- **RxCui**: {row['RxCui']}")
                     st.markdown(f"- **Class**: {row['Class']}")
                     st.markdown("---")
@@ -67,6 +68,8 @@ if ndc_input:
                 for _, row in filtered_data.iterrows():
                     st.markdown(f"- **Script (RX#)**: {row['RX#']}")
                     st.markdown(f"- **R#**: {row['R#']}")
+                    st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
+                    st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
                     st.markdown(f"- **Acquisition Cost (ACQ_x)**: {row['ACQ_x']}")
                     st.markdown(f"- **Profit**: {row['Profit']}")
                     st.markdown(f"- **Gross Margin (GM)**: {row['GM']}")
