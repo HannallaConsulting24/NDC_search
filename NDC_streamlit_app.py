@@ -46,18 +46,32 @@ if ndc_input:
         if not filtered_data.empty:
             st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input} and Insurance: {insurance_input}")
 
-            # Display main details for medications
-            st.subheader("Drug Details")
-            for _, row in filtered_data.iterrows():
-                st.markdown(f"- **Drug Name**: {row['Drug Name']}")
-                st.markdown(f"- **NDC**: {row['NDC']}")
-                st.markdown(f"- **Manufacturer**: {row['MFG']}")
-                st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
-                st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-                st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
-                st.markdown(f"- **RxCui**: {row['RxCui']}")
-                st.markdown(f"- **Class**: {row['Class']}")
-                st.markdown("---")
+            # Layout for splitting Drug Details and Prescription Details
+            left_col, right_col = st.columns(2)
+
+            with left_col:
+                st.subheader("Drug Details")
+                for _, row in filtered_data.iterrows():
+                    st.markdown(f"- **Drug Name**: {row['Drug Name']}")
+                    st.markdown(f"- **NDC**: {row['NDC']}")
+                    st.markdown(f"- **Manufacturer**: {row['MFG']}")
+                    st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
+                    st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
+                    st.markdown(f"- **Acquisition Cost**: {row['ACQ_y']}")
+                    st.markdown(f"- **RxCui**: {row['RxCui']}")
+                    st.markdown(f"- **Class**: {row['Class']}")
+                    st.markdown("---")
+
+            with right_col:
+                st.subheader("Prescription Details")
+                for _, row in filtered_data.iterrows():
+                    st.markdown(f"- **Script (RX#)**: {row['RX#']}")
+                    st.markdown(f"- **R#**: {row['R#']}")
+                    st.markdown(f"- **Acquisition Cost (ACQ_x)**: {row['ACQ_x']}")
+                    st.markdown(f"- **Profit**: {row['Profit']}")
+                    st.markdown(f"- **Gross Margin (GM)**: {row['GM']}")
+                    st.markdown(f"- **Total**: {row['Total']}")
+                    st.markdown("---")
 
             # Display alternatives based on RxCui
             rxcui_value = filtered_data.iloc[0]['RxCui']
@@ -75,17 +89,6 @@ if ndc_input:
                     st.markdown("---")
             else:
                 st.warning("No alternatives found for this RxCui.")
-
-            # Display additional details for prescriptions
-            st.subheader("Prescription Details")
-            for _, row in filtered_data.iterrows():
-                st.markdown(f"- **Script (RX#)**: {row['RX#']}")
-                st.markdown(f"- **R#**: {row['R#']}")
-                st.markdown(f"- **Acquisition Cost (ACQ_x)**: {row['ACQ_x']}")
-                st.markdown(f"- **Profit**: {row['Profit']}")
-                st.markdown(f"- **Gross Margin (GM)**: {row['GM']}")
-                st.markdown(f"- **Total**: {row['Total']}")
-                st.markdown("---")
         else:
             st.error(f"No results found for NDC: {ndc_input} and Insurance: {insurance_input}")
     else:
