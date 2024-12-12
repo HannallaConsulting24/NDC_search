@@ -60,6 +60,7 @@ if drug_name != "Type here...":
             alternatives = data[data['ClassDb'] == drug_class]
 
             if selected_insurance != "Type here...":
+    if selected_insurance != "All Insurances":
                 if selected_insurance != "All Insurances":
                 alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
