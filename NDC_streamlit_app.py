@@ -25,34 +25,35 @@ with title_col2:
 # Input Section
 st.markdown("### Search Criteria")
 
-# Input drug name
-drug_name = st.selectbox("Type or Select Drug Name (Required):", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
+# Input all fields at once
+input_col1, input_col2, input_col3 = st.columns(3)
 
-if drug_name != "Type here...":
-    # Input NDC
+with input_col1:
+    drug_name = st.selectbox("Type or Select Drug Name:", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
+
+with input_col2:
     ndc_options = list(data['NDC'].unique())
-    selected_ndc = st.selectbox("Type or Select NDC (Required):", options=["Type here..."] + list(ndc_options), index=0)
+    selected_ndc = st.selectbox("Type or Select NDC:", options=["Type here..."] + list(ndc_options), index=0)
 
-    if selected_ndc != "Type here...":
-        # Input insurance
-        insurance_options = list(data['Ins'].unique())
-        selected_insurance = st.selectbox("Type or Select Insurance (Required):", options=["Type here..."] + list(insurance_options), index=0)
+with input_col3:
+    insurance_options = list(data['Ins'].unique())
+    selected_insurance = st.selectbox("Type or Select Insurance:", options=["Type here..."] + list(insurance_options), index=0)
 
-        if selected_insurance != "Type here...":
-            # Filter data
-            filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
+# Filter and display data if all fields are selected
+if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_insurance != "Type here...":
+    filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
 
-            # Display results
-            if not filtered_data.empty:
-                st.subheader("Selected Drug Details")
-                for _, row in filtered_data.iterrows():
-                    st.markdown("---")
-                    st.markdown(f"- **NDC**: {row['NDC']}")
-                    st.markdown(f"- **Date**: {row['Date']}")
-                    st.markdown(f"- **Script**: {row['Script']}")
-                    st.markdown(f"- **Copay**: {row['Pat Pay']}")
-                    st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-                    st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-                    st.markdown(f"- **Net Profit**: {row['Net Profit']}")
-            else:
-                st.warning("No data matches your search criteria.")
+    if not filtered_data.empty:
+        st.subheader("Selected Drug Details")
+        for _, row in filtered_data.iterrows():
+            st.markdown("---")
+            st.markdown(f"- **Drug Name**: {row['Drug Name']}")
+            st.markdown(f"- **NDC**: {row['NDC']}")
+            st.markdown(f"- **Date**: {row['Date']}")
+            st.markdown(f"- **Script**: {row['Script']}")
+            st.markdown(f"- **Copay**: {row['Pat Pay']}")
+            st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
+            st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
+            st.markdown(f"- **Net Profit**: {row['Net Profit']}")
+    else:
+        st.warning("No data matches your search criteria.")
