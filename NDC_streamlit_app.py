@@ -26,19 +26,19 @@ with title_col2:
 st.markdown("### Search Criteria")
 
 # Input drug name
-drug_name = st.text_input("Type or Select Drug Name (Required):", value="", placeholder="Type here...")
+drug_name = st.selectbox("Type or Select Drug Name (Required):", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
 
 # Optional filters
-if drug_name:
-    ndc_options = data[data['Drug Name'].str.contains(drug_name, case=False, na=False)]['NDC'].unique()
-    selected_ndc = st.selectbox("Type or Select NDC (Optional):", options=["Type here..."] + list(ndc_options))
+if drug_name != "Type here...":
+    ndc_options = data[data['Drug Name'] == drug_name]['NDC'].unique()
+    selected_ndc = st.selectbox("Type or Select NDC (Optional):", options=["Type here..."] + list(ndc_options), index=0)
 
-    if selected_ndc and selected_ndc != "Type here...":
-        insurance_options = data[(data['Drug Name'].str.contains(drug_name, case=False, na=False)) & (data['NDC'] == selected_ndc)]['Ins'].unique()
-        selected_insurance = st.selectbox("Type or Select Insurance (Optional):", options=["Type here..."] + list(insurance_options))
+    if selected_ndc != "Type here...":
+        insurance_options = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc)]['Ins'].unique()
+        selected_insurance = st.selectbox("Type or Select Insurance (Optional):", options=["Type here..."] + list(insurance_options), index=0)
 
         # Filter data based on selections
-        filtered_data = data[(data['Drug Name'].str.contains(drug_name, case=False, na=False)) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
+        filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
 
         # Display results
         if not filtered_data.empty:
@@ -83,4 +83,4 @@ if drug_name:
     else:
         st.info("Please select an NDC to proceed.")
 else:
-    st.info("Please enter a Drug Name to begin your search.")
+    st.info("Please enter or select a Drug Name to begin your search.")
