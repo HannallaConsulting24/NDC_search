@@ -26,21 +26,21 @@ with title_col2:
 st.markdown("### Search Criteria")
 
 # Select drug name
-drug_name = st.selectbox("Select Drug Name (Required):", options=[""] + list(data['Drug Name'].unique()))
+drug_name = st.selectbox("Select Drug Name (Required):", options=list(data['Drug Name'].unique()))
 
 # Optional filters
 if drug_name:
     ndc_options = data[data['Drug Name'] == drug_name]['NDC'].unique()
-    selected_ndc = st.selectbox("Select NDC (Optional):", options=[""] + list(ndc_options))
+    selected_ndc = st.selectbox("Select NDC (Optional):", options=ndc_options)
 
-    insurance_options = data['Ins'].dropna().unique()
-    selected_insurance = st.selectbox("Select Insurance (Optional):", options=[""] + list(insurance_options))
+    insurance_options = ["All Insurances"] + list(data['Ins'].dropna().unique())
+    selected_insurance = st.selectbox("Select Insurance (Optional):", options=insurance_options)
 
     # Filter data based on selections
     filtered_data = data[data['Drug Name'] == drug_name]
     if selected_ndc:
         filtered_data = filtered_data[filtered_data['NDC'] == selected_ndc]
-    if selected_insurance:
+    if selected_insurance and selected_insurance != "All Insurances":
         filtered_data = filtered_data[filtered_data['Ins'] == selected_insurance]
 
     # Display results
@@ -58,7 +58,7 @@ if drug_name:
             drug_class = first_result['ClassDb']
             alternatives = data[data['ClassDb'] == drug_class]
 
-            if selected_insurance:
+            if selected_insurance and selected_insurance != "All Insurances":
                 alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
             st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
