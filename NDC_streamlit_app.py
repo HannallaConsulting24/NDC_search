@@ -5,16 +5,16 @@ import numpy as np
 # Load the primary dataset
 @st.cache_data
 def load_data():
-    file_path = 'Updated_Insurance_Prescription_Data.xlsx'
-    return pd.read_excel(file_path).drop_duplicates()
+    file_path = 'Updated_Dataset_with_Net_Columns.csv'
+    return pd.read_csv(file_path).drop_duplicates()
 
 data = load_data()
 
 # Load the alternatives dataset
 @st.cache_data
 def load_alternative_data():
-    alternative_file_path = 'last_dance.xlsx'
-    return pd.read_excel(alternative_file_path).drop_duplicates()
+    alternative_file_path = 'updated_dataset_with_net_columns (1).csv'
+    return pd.read_csv(alternative_file_path).drop_duplicates()
 
 alternative_data = load_alternative_data()
 
