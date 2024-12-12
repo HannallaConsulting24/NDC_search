@@ -50,6 +50,7 @@ with input_col3:
 # Filter and display data if all fields are selected
 if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_insurance != "Type here...":
     filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
+    filtered_data = filtered_data.sort_values(by='Date', ascending=False).head(1)
 
     if not filtered_data.empty:
         st.subheader("Selected Drug Details")
@@ -60,14 +61,13 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             st.markdown(f"- **Copay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-            st.markdown(f"- **Net Profit1**: {row['net_1']}")
-            st.markdown(f"- **Net Profit2**: {row['net_2']}")
-            
+            st.markdown(f"- **Net Profit**: {row['Net Profit']}")
+
         # Alternatives by Class from the alternative dataset
         st.subheader("Alternative Drugs by Class")
         if 'Class' in alternative_data.columns:
             drug_class = alternative_data[alternative_data['NDC'] == selected_ndc]['Class'].iloc[0]
-            alternatives = alternative_data[(alternative_data['Class'] == drug_class) & (alternative_data['NDC'] != selected_ndc)]
+            alternatives = alternative_data[(alternative_data['Class'] == drug_class)]
 
             st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
 
