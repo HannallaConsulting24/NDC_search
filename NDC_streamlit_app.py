@@ -53,6 +53,6 @@ if drug_name != "Type here...":
                     st.markdown(f"- **Copay**: {row['Pat Pay']}")
                     st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
                     st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-                    st.markdown(f"- **Net Profit**: {row['Net Profit']}\")
+                    st.markdown(f"- **Net Profit**: {row['Net Profit']}")
             else:
                 st.warning("No data matches your search criteria.")
