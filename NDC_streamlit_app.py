@@ -47,13 +47,34 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
         st.subheader("Selected Drug Details")
         for _, row in filtered_data.iterrows():
             st.markdown("---")
-            st.markdown(f"- **Drug Name**: {row['Drug Name']}")
-            st.markdown(f"- **NDC**: {row['NDC']}")
             st.markdown(f"- **Date**: {row['Date']}")
             st.markdown(f"- **Script**: {row['Script']}")
             st.markdown(f"- **Copay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
             st.markdown(f"- **Net Profit**: {row['Net Profit']}")
+
+        # Alternatives by Class
+        st.subheader("Alternative Drugs by Class")
+        if 'ClassDb' in data.columns:
+            drug_class = filtered_data.iloc[0]['ClassDb']
+            alternatives = data[(data['ClassDb'] == drug_class) & (data['NDC'] != selected_ndc)]
+
+            st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
+
+            sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
+            if sort_option == "Highest Net Profit":
+                alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+            elif sort_option == "Lowest Copay":
+                alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
+
+            for _, alt_row in alternatives.iterrows():
+                st.markdown("---")
+                st.markdown(f"### Alternative: {alt_row['Drug Name']}")
+                st.markdown(f"- **NDC**: {alt_row['NDC']}")
+                st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
+                st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
+                st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
+                st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
     else:
         st.warning("No data matches your search criteria.")
