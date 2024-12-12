@@ -61,8 +61,7 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             st.markdown(f"- **Copay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-            st.markdown(f"- **Net Profit1**: {row['net_1']}")
-            st.markdown(f"- **Net Profit2**: {row['net_2']}")
+            st.markdown(f"- **Net Profit**: {row['Net Profit']}")
 
         # Alternatives by Class from the alternative dataset
         st.subheader("Alternative Drugs by Class")
@@ -81,26 +80,21 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
             if sort_option == "Highest Net Profit":
                 if 'net_1' in alternatives.columns:
-                    alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+                    alternatives = alternatives.sort_values(by="net_1", ascending=False)
                 else:
-                    st.warning("Column 'Net Profit' not found in alternatives dataset.")
+                    st.warning("Column 'Profit' not found in alternatives dataset.")
             elif sort_option == "Lowest Copay":
                 if 'Pat Pay' in alternatives.columns:
                     alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
                 else:
-                    st.warning("Column 'Pat Pay' not found in alternatives dataset.")
+                    st.warning("Column 'ACQ_x' not found in alternatives dataset.")
 
             for _, alt_row in alternatives.iterrows():
                 st.markdown("---")
                 st.markdown(f"### Alternative: {alt_row['Drug Name']}")
                 st.markdown(f"- **NDC**: {alt_row['NDC']}")
+                st.markdown(f"- **Copay**: {alt_row['ACQ_x']}")
+                st.markdown(f"- **Profit**: {alt_row['Profit']}")
                 st.markdown(f"- **Class**: {alt_row['Class']}")
-                st.markdown(f"- **RxCui**: {alt_row['RxCui']}")
-                st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Script**: {alt_row['Script']}")
-                st.markdown(f"- **Date**: {alt_row['Date']}")
-                st.markdown(f"- **ACQ**: {alt_row['ACQ']}")
-                st.markdown(f"- **Net Profit1**: {alt_row['net_1']}")
-                st.markdown(f"- **Net Profit2**: {alt_row['net_2']}")
     else:
         st.warning("No data matches your search criteria.")
