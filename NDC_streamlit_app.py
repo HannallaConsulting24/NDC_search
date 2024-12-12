@@ -34,7 +34,7 @@ if drug_name != "Type here...":
     ndc_options = data['NDC'].unique()
     selected_ndc = st.selectbox("Type or Select NDC (Optional):", options=["Type here..."] + list(ndc_options), index=0)
 
-    insurance_options = ["All Insurances"] + list(data['Ins'].unique())
+    insurance_options = list(data['Ins'].unique())
     selected_insurance = st.selectbox("Type or Select Insurance (Optional):", options=["Type here..."] + list(insurance_options), index=0)
 
     # Filter data based on selections
@@ -60,10 +60,7 @@ if drug_name != "Type here...":
             alternatives = data[data['ClassDb'] == drug_class]
 
             if selected_insurance != "Type here...":
-                if selected_insurance != "All Insurances":
-        if selected_insurance != "All Insurances":
-                if selected_insurance != "All Insurances":
-                    alternatives = alternatives[alternatives['Ins'] == selected_insurance]
+                alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
             st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
 
