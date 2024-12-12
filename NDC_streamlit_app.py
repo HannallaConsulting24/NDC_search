@@ -33,7 +33,7 @@ if drug_name:
     ndc_options = data[data['Drug Name'] == drug_name]['NDC'].unique()
     selected_ndc = st.selectbox("Select NDC (Optional):", options=ndc_options)
 
-    insurance_options = ["All Insurances"] + list(data['Ins'].dropna().unique())
+    insurance_options = list(data['Ins'].dropna().unique())
     selected_insurance = st.selectbox("Select Insurance (Optional):", options=insurance_options)
 
     # Filter data based on selections
