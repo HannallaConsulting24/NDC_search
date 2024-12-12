@@ -25,25 +25,27 @@ with title_col2:
 # Input Section
 st.markdown("### Search Criteria")
 
-# Select drug name
-drug_name = st.selectbox("Select Drug Name (Required):", options=list(data['Drug Name'].unique()))
+# Input drug name
+drug_name = st.text_input("Type or Select Drug Name (Required):", value="", placeholder="Type here...")
 
 # Optional filters
 if drug_name:
-    ndc_options = data[data['Drug Name'] == drug_name]['NDC'].unique()
-    selected_ndc = st.selectbox("Select NDC (Required):", options=ndc_options)
+    ndc_options = data[data['Drug Name'].str.contains(drug_name, case=False, na=False)]['NDC'].unique()
+    selected_ndc = st.selectbox("Type or Select NDC (Optional):", options=["Type here..."] + list(ndc_options))
 
-    if selected_ndc:
-        insurance_options = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc)]['Ins'].unique()
-        selected_insurance = st.selectbox("Select Insurance (Required):", options=insurance_options)
+    if selected_ndc and selected_ndc != "Type here...":
+        insurance_options = data[(data['Drug Name'].str.contains(drug_name, case=False, na=False)) & (data['NDC'] == selected_ndc)]['Ins'].unique()
+        selected_insurance = st.selectbox("Type or Select Insurance (Optional):", options=["Type here..."] + list(insurance_options))
 
         # Filter data based on selections
-        filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
+        filtered_data = data[(data['Drug Name'].str.contains(drug_name, case=False, na=False)) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
 
         # Display results
         if not filtered_data.empty:
             st.subheader("Selected Drug Details")
             first_result = filtered_data.iloc[0]
+            st.markdown(f"- **Date**: {first_result['Date']}")
+            st.markdown(f"- **Script**: {first_result['Script']}")
             st.markdown(f"- **Copay**: {first_result['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {first_result['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {first_result['ACQ']}")
@@ -55,7 +57,8 @@ if drug_name:
                 drug_class = first_result['ClassDb']
                 alternatives = data[data['ClassDb'] == drug_class]
 
-                alternatives = alternatives[alternatives['Ins'] == selected_insurance]
+                if selected_insurance != "Type here...":
+                    alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
                 st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
 
@@ -69,6 +72,8 @@ if drug_name:
                     st.markdown("---")
                     st.markdown(f"### Alternative: {alt_row['Drug Name']}")
                     st.markdown(f"- **NDC**: {alt_row['NDC']}")
+                    st.markdown(f"- **Date**: {alt_row['Date']}")
+                    st.markdown(f"- **Script**: {alt_row['Script']}")
                     st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
                     st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
                     st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
@@ -78,4 +83,4 @@ if drug_name:
     else:
         st.info("Please select an NDC to proceed.")
 else:
-    st.info("Please select a Drug Name to begin your search.")
+    st.info("Please enter a Drug Name to begin your search.")
