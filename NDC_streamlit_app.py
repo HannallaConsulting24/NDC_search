@@ -60,9 +60,9 @@ if drug_name != "Type here...":
             alternatives = data[data['ClassDb'] == drug_class]
 
             if selected_insurance != "Type here...":
-    if selected_insurance != "All Insurances":
+        if selected_insurance != "All Insurances":
                 if selected_insurance != "All Insurances":
-                alternatives = alternatives[alternatives['Ins'] == selected_insurance]
+        alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
             st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
 
