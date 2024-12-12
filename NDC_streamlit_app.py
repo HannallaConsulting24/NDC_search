@@ -66,7 +66,10 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
         # Alternatives by Class from the alternative dataset
         st.subheader("Alternative Drugs by Class")
         if 'Class' in alternative_data.columns:
-            drug_class = alternative_data[alternative_data['NDC'] == selected_ndc]['Class'].iloc[0]
+            if not alternative_data[alternative_data['NDC'] == selected_ndc].empty:
+                drug_class = alternative_data[alternative_data['NDC'] == selected_ndc]['Class'].iloc[0]
+            else:
+                drug_class = None
             alternatives = alternative_data[(alternative_data['Class'] == drug_class)]
 
             st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
