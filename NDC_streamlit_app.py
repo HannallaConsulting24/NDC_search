@@ -80,15 +80,15 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
 
             sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
             if sort_option == "Highest Net Profit":
-                if 'Profit' in alternatives.columns:
-                    alternatives = alternatives.sort_values(by="Profit", ascending=False)
+                if 'net_1' in alternatives.columns:
+                    alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
                 else:
-                    st.warning("Column 'Profit' not found in alternatives dataset.")
+                    st.warning("Column 'Net Profit' not found in alternatives dataset.")
             elif sort_option == "Lowest Copay":
-                if 'ACQ_x' in alternatives.columns:
-                    alternatives = alternatives.sort_values(by="ACQ_x", ascending=True)
+                if 'Pat Pay' in alternatives.columns:
+                    alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
                 else:
-                    st.warning("Column 'ACQ_x' not found in alternatives dataset.")
+                    st.warning("Column 'Pat Pay' not found in alternatives dataset.")
 
             for _, alt_row in alternatives.iterrows():
                 st.markdown("---")
