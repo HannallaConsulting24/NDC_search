@@ -1,103 +1,83 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 # Load the dataset
 @st.cache_data
 def load_data():
-    file_path = 'last_dance.xlsx'
-    return pd.read_excel(file_path)
+    file_path = 'Updated_Insurance_Prescription_Data.xlsx'
+    return pd.read_excel(file_path).drop_duplicates()
 
-# Load the data
 data = load_data()
 
-# Ensure the NDC column is string for consistent search
+# Ensure relevant columns are properly formatted
+data['Drug Name'] = data['Drug Name'].str.strip()
 data['NDC'] = data['NDC'].astype(str).str.strip()
+data['Net Profit'] = (data['Pat Pay'] + data['Ins Pay']) - data['ACQ']
 
-# Sort NDC options by their frequency of occurrence
-ndc_frequency = data['NDC'].value_counts()
-ndc_options = sorted(data['NDC'].unique(), key=lambda x: -ndc_frequency.get(x, 0))
+# Title and Logo
+title_col1, title_col2 = st.columns([1, 4])
+with title_col1:
+    st.image("img.png", use_column_width=True)
+with title_col2:
+    st.title("Enhanced Medication Query Tool 💊")
 
-# Streamlit app starts here
-logo_path = "img.png"
+# Input Section
+st.markdown("### Search Criteria")
 
-# Layout for title and logo
-col1, col2 = st.columns([1, 4])
-with col1:
-    st.image(logo_path, use_container_width=True)
-with col2:
-    st.markdown("""
-    <h1 style='display: inline-block; vertical-align: middle;'>Medication Search Tool 💊</h1>
-    """, unsafe_allow_html=True)
+# Select drug name
+drug_name = st.selectbox("Select Drug Name (Required):", options=[""] + list(data['Drug Name'].unique()))
 
-st.markdown("### Search by NDC Code and Insurance")
+# Optional filters
+if drug_name:
+    ndc_options = data[data['Drug Name'] == drug_name]['NDC'].unique()
+    selected_ndc = st.selectbox("Select NDC (Optional):", options=[""] + list(ndc_options))
 
-# Fetch unique values for dropdowns and sort Insurance options based on the selected NDC
-ndc_input = st.selectbox("Select NDC Code:", options=[""] + ndc_options, format_func=lambda x: x if x else "Type or select an NDC Code...")
+    insurance_options = data['Ins'].dropna().unique()
+    selected_insurance = st.selectbox("Select Insurance (Optional):", options=[""] + list(insurance_options))
 
-if ndc_input:
-    related_insurance = data[data['NDC'] == ndc_input]['Ins'].value_counts()
-    insurance_options = ["All"] + sorted(data['Ins'].unique(), key=lambda x: -related_insurance.get(x, 0))
-    insurance_input = st.selectbox("Select Insurance:", options=[""] + insurance_options, format_func=lambda x: x if x else "Type or select Insurance...")
+    # Filter data based on selections
+    filtered_data = data[data['Drug Name'] == drug_name]
+    if selected_ndc:
+        filtered_data = filtered_data[filtered_data['NDC'] == selected_ndc]
+    if selected_insurance:
+        filtered_data = filtered_data[filtered_data['Ins'] == selected_insurance]
 
-    if insurance_input:
-        if insurance_input == "All":
-            # Filter data based on NDC only
-            filtered_data = data[data['NDC'] == ndc_input].drop_duplicates()
-        else:
-            # Filter data based on NDC and Insurance
-            filtered_data = data[(data['NDC'] == ndc_input) & (data['Ins'] == insurance_input)].drop_duplicates()
+    # Display results
+    if not filtered_data.empty:
+        st.subheader("Selected Drug Details")
+        first_result = filtered_data.iloc[0]
+        st.markdown(f"- **Copay**: {first_result['Pat Pay']}")
+        st.markdown(f"- **Insurance Pay**: {first_result['Ins Pay']}")
+        st.markdown(f"- **Acquisition Cost**: {first_result['ACQ']}")
+        st.markdown(f"- **Net Profit**: {first_result['Net Profit']}")
 
-        if not filtered_data.empty:
-            st.success(f"Found {len(filtered_data)} result(s) for NDC: {ndc_input} and Insurance: {insurance_input}")
+        # Alternatives by Class
+        st.subheader("Alternative Drugs by Class")
+        if 'ClassDb' in data.columns:
+            drug_class = first_result['ClassDb']
+            alternatives = data[data['ClassDb'] == drug_class]
 
-            # Layout for splitting Drug Details and Prescription Details
-            left_col, right_col = st.columns(2)
+            if selected_insurance:
+                alternatives = alternatives[alternatives['Ins'] == selected_insurance]
 
-            with left_col:
-                st.subheader("Drug Details")
-                for _, row in filtered_data.iterrows():
-                    st.markdown(f"- **Drug Name**: {row['Drug Name']}")
-                    st.markdown(f"- **NDC**: {row['NDC']}")
-                    st.markdown(f"- **Manufacturer**: {row['MFG']}")
-                    st.markdown(f"- **RxCui**: {row['RxCui']}")
-                    st.markdown(f"- **Class**: {row['Class']}")
-                    st.markdown("---")
+            st.markdown(f"Found {len(alternatives)} alternatives in the same class.")
 
-            with right_col:
-                st.subheader("Prescription Details")
-                for _, row in filtered_data.iterrows():
-                    col_r1, col_r2 = st.columns(2)
-                    with col_r1:
-                        st.markdown(f"- **Script (RX#)**: {row['RX#']}")
-                        st.markdown(f"- **R#**: {row['R#']}")
-                    with col_r2:
-                        st.markdown(f"- **Patient Pay**: {row['Pat Pay']}")
-                        st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-                    st.markdown(f"- **Acquisition Cost (ACQ_x)**: {row['ACQ_x']}")
-                    st.markdown(f"- **Profit**: {row['Profit']}")
-                    st.markdown(f"- **Gross Margin (GM)**: {row['GM']}")
-                    st.markdown(f"- **Total**: {row['Total']}")
-                    st.markdown("---")
+            sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
+            if sort_option == "Highest Net Profit":
+                alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+            elif sort_option == "Lowest Copay":
+                alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
 
-            # Display alternatives based on RxCui
-            rxcui_value = filtered_data.iloc[0]['RxCui']
-            alternatives = data[(data['RxCui'] == rxcui_value) & (data['NDC'] != ndc_input)].drop_duplicates(subset=['NDC'])
-
-            if not alternatives.empty:
-                st.markdown("<h3 style='color:blue;'>Alternative Medications</h3>", unsafe_allow_html=True)
-                for _, alt_row in alternatives.iterrows():
-                    st.markdown(f"<div style='font-size:16px;'><strong>Drug Name:</strong> {alt_row['Drug Name']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='font-size:16px;'><strong>NDC:</strong> {alt_row['NDC']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='font-size:16px;'><strong>Manufacturer:</strong> {alt_row['MFG']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='font-size:16px;'><strong>Patient Pay:</strong> {alt_row['Pat Pay']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='font-size:16px;'><strong>Insurance Pay:</strong> {alt_row['Ins Pay']}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div style='font-size:16px;'><strong>Acquisition Cost:</strong> {alt_row['ACQ_y']}</div>", unsafe_allow_html=True)
-                    st.markdown("---")
-            else:
-                st.warning("No alternatives found for this RxCui.")
-        else:
-            st.error(f"No results found for NDC: {ndc_input} and Insurance: {insurance_input}")
+            for _, alt_row in alternatives.iterrows():
+                st.markdown("---")
+                st.markdown(f"### Alternative: {alt_row['Drug Name']}")
+                st.markdown(f"- **NDC**: {alt_row['NDC']}")
+                st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
+                st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
+                st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
+                st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
     else:
-        st.info("Please select Insurance to search.")
+        st.warning("No data matches your search criteria.")
 else:
-    st.info("Please select an NDC Code to search.")
+    st.info("Please select a Drug Name to begin your search.")
