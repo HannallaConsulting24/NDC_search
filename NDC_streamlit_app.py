@@ -18,7 +18,7 @@ data['Net Profit'] = (data['Pat Pay'] + data['Ins Pay']) - data['ACQ']
 # Title and Logo
 title_col1, title_col2 = st.columns([1, 4])
 with title_col1:
-    st.image("img.png", use_column_width=True)
+    st.image("img.png", use_container_width=True)
 with title_col2:
     st.title("Enhanced Medication Query Tool 💊")
 
