@@ -113,7 +113,7 @@ if drug_name_input and insurance_code and not filtered_df.empty:
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
     st.markdown(f"- **Class**: {first_valid_result['class']}")
     st.markdown(f"- **Script**: {first_valid_result['Script']}")
-    st.markdown(f"- **Date**: {first_valid_result['Date'].strftime('%m/%d/%Y')}")
+    st.markdown(f"- **Date**: {first_valid_result['Date'].strftime('%m/%d/%Y') if pd.notnull(first_valid_result['Date']) else 'Not Available'}")
     st.markdown("---")
 
     # Find alternatives by class
