@@ -48,7 +48,7 @@ if insurance_input:
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
 
 if drug_name_input and not filtered_df.empty:
-    st.subheader(f"Results for {drug_name_input}:")
+    st.subheader(f"Latest Billing Details :")
 
     # Display selected drug details
     first_valid_result = filtered_df.iloc[0]
