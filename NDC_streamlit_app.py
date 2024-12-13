@@ -78,7 +78,11 @@ if drug_name_input:
 else:
     ndc_input = None
 
-insurance_input = st.selectbox("Select Insurance:", options=[opt for opt in [""] + list(df['Ins Full Name'].unique()) if opt.strip()], format_func=lambda x: x if x else "Type to search...")
+if drug_name_input:
+    insurances_for_drug = df[df['Drug Name'] == drug_name_input]['Ins Full Name'].unique()
+    insurance_input = st.selectbox("Select Insurance:", options=[opt for opt in [""] + list(insurances_for_drug) if opt.strip()], format_func=lambda x: x if x else "Type to search...")
+else:
+    insurance_input = st.selectbox("Select Insurance:", options=[""], format_func=lambda x: x if x else "Type to search...")
 
 # Map insurance input back to short code
 insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if insurance_input else None
