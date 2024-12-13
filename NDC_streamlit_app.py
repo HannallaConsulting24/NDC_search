@@ -53,11 +53,12 @@ if drug_name_input and not filtered_df.empty:
     # Display selected drug details
     first_valid_result = filtered_df.iloc[0]
     st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
-    st.markdown(f"- **Class**: {first_valid_result['class']}")
+    st.markdown(f"- **quantity**: {first_valid_result['Qty']}")
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']}")
     st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
-    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']}")
+    st.markdown(f"- **Class**: {first_valid_result['class']}")
     st.markdown("---")
 
     # Find alternatives by class
