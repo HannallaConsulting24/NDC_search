@@ -105,7 +105,7 @@ if insurance_input:
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
 
 if drug_name_input and ndc_input and filtered_df.empty:
-    st.subheader(f"No insurance data available for {drug_name_input} with NDC {ndc_input}")
+    st.markdown(f"<p style='color: red; font-weight: bold;'>No insurance data available for {drug_name_input} with NDC {ndc_input}</p>", unsafe_allow_html=True)
 
     # Fetch details from reclassified database
     formatted_ndc = f"{ndc_input[:5]}-{ndc_input[5:9]}-{ndc_input[9:]}"
@@ -169,4 +169,4 @@ if drug_name_input and insurance_code and not filtered_df.empty:
     else:
         st.info("No alternatives available for drugs in the 'Other' class.")
 else:
-    st.warning("No results found for the selected criteria.")
+    
