@@ -21,7 +21,6 @@ alternative_data = load_alternative_data()
 # Ensure relevant columns are properly formatted
 data['Drug Name'] = data['Drug Name'].str.strip()
 data['NDC'] = data['NDC'].astype(str).str.strip()
-data['Net Profit'] = (data['Pat Pay'] + data['Ins Pay']) - data['ACQ']
 
 # Title and Logo
 title_col1, title_col2 = st.columns([1, 4])
