@@ -19,6 +19,9 @@ df['class'] = df['class'].astype(str).str.strip()
 # Ensure Date column is parsed as datetime for sorting
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
+# Calculate Net Profit dynamically
+df['Net Profit'] = (df['Pat Pay'] + df['Ins Pay']) - df['ACQ']
+
 # Insurance mapping (short to full name)
 insurance_mapping = {
     'AL': 'Aetna (AL)',
@@ -70,9 +73,11 @@ st.markdown("### Input your search criteria below:")
 st.markdown("#### Required Input:")
 drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['Drug Name'].unique()), format_func=lambda x: x if x else "Type to search...")
 
-st.markdown("#### Optional Filters:")
-ndc_input = st.selectbox("Select an NDC (Optional):", options=[""] + list(df['NDC'].unique()), format_func=lambda x: x if x else "Type to search...")
-insurance_input = st.selectbox("Select Insurance (Optional):", options=[""] + list(insurance_mapping.values()), format_func=lambda x: x if x else "Type to search...")
+if drug_name_input:
+    ndcs_for_drug = df[df['Drug Name'] == drug_name_input]['NDC'].unique()
+    ndc_input = st.selectbox("Select an NDC:", options=ndcs_for_drug, format_func=lambda x: x if x else "Type to search...")
+
+insurance_input = st.selectbox("Select Insurance:", options=list(insurance_mapping.values()), format_func=lambda x: x if x else "Type to search...")
 
 # Map insurance input back to short code
 insurance_code = [k for k, v in insurance_mapping.items() if v == insurance_input]
@@ -88,7 +93,7 @@ if insurance_code:
 # Sort filtered data by latest date
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
 
-if drug_name_input and not filtered_df.empty:
+if drug_name_input and insurance_code and not filtered_df.empty:
     st.subheader(f"Latest Billing Details :")
 
     # Display selected drug details
