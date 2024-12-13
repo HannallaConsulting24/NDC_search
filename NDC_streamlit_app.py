@@ -39,7 +39,7 @@ with input_col1:
     drug_name = st.selectbox("Type or Select Drug Name:", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
 
 with input_col2:
-    ndc_options = list(data['NDC'].unique())
+    ndc_options = data['NDC'].unique()
     selected_ndc = st.selectbox("Type or Select NDC:", options=["Type here..."] + list(ndc_options), index=0)
 
 with input_col3:
@@ -95,6 +95,6 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
                 st.markdown(f"- **Class**: {alt_row['Class']}")
                 st.markdown(f"- **RxCui**: {alt_row['RxCui']}")
                 st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Net Profit**: {alt_row['net_2']}")
+                st.markdown(f"- **Net Profit**: {alt_row['net_2']}"))
     else:
         st.warning("No data matches your search criteria.")
