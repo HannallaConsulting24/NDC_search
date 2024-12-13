@@ -16,8 +16,17 @@ df['NDC'] = df['NDC'].astype(str).str.strip()
 df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
 df['class'] = df['class'].astype(str).str.strip()
 
+# Ensure Date column is parsed as datetime for sorting
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+
 # Display logo and title
-st.title("Enhanced Medication Guiding Tool 💊")
+logo_path = 'img.png'  # Replace with the actual path to your logo
+col1, col2 = st.columns([1, 4])
+with col1:
+    st.image(logo_path, use_column_width=True)
+with col2:
+    st.title("Enhanced Medication Guiding Tool 💊")
+
 st.markdown("### Input your search criteria below:")
 
 # Input Fields
@@ -34,6 +43,9 @@ if ndc_input:
     filtered_df = filtered_df[filtered_df['NDC'] == ndc_input]
 if insurance_input:
     filtered_df = filtered_df[filtered_df['Ins'] == insurance_input]
+
+# Sort filtered data by latest date
+filtered_df = filtered_df.sort_values(by='Date', ascending=False)
 
 if not filtered_df.empty:
     st.subheader(f"Results for {drug_name_input}:")
