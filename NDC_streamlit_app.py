@@ -36,15 +36,15 @@ st.markdown("### Search Criteria")
 input_col1, input_col2, input_col3 = st.columns(3)
 
 with input_col1:
-    drug_name = st.selectbox("Type or Select Drug Name:", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
+    drug_name = st.selectbox("Type or Select Drug Name:", options=list(data.dropna(subset=['Drug Name'])['Drug Name'].unique()) + ["Type here..."], index=0)
 
 with input_col2:
     ndc_options = data['NDC'].unique()
-    selected_ndc = st.selectbox("Type or Select NDC:", options=["Type here..."] + list(ndc_options), index=0)
+    selected_ndc = st.selectbox("Type or Select NDC:", options=list(data.dropna(subset=['NDC'])['NDC'].unique()) + ["Type here..."], index=0)
 
 with input_col3:
     insurance_options = list(data['Ins'].unique())
-    selected_insurance = st.selectbox("Type or Select Insurance:", options=["Type here..."] + list(insurance_options), index=0)
+    selected_insurance = st.selectbox("Type or Select Insurance:", options=list(data.dropna(subset=['Ins'])['Ins'].unique()) + ["Type here..."], index=0)
 
 # Filter and display data if all fields are selected
 if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_insurance != "Type here...":
