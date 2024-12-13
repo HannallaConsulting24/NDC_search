@@ -76,6 +76,8 @@ drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df
 if drug_name_input:
     ndcs_for_drug = df[df['Drug Name'] == drug_name_input]['NDC'].unique()
     ndc_input = st.selectbox("Select an NDC:", options=ndcs_for_drug, format_func=lambda x: x if x else "Type to search...")
+else:
+    ndc_input = None
 
 insurance_input = st.selectbox("Select Insurance:", options=list(insurance_mapping.values()), format_func=lambda x: x if x else "Type to search...")
 
