@@ -79,6 +79,7 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
             if sort_option == "Highest Net Profit":
                 if 'net_2' in alternatives.columns and alternatives['net_2'].notnull().any() and alternatives['net_2'].dtype in [np.float64, np.int64]:
+                    alternatives = alternatives[alternatives['net_2'].notnull()]
                     alternatives = alternatives.sort_values(by="net_2", ascending=False)
                 else:
                     st.warning("Column 'net_2' is missing, contains invalid data, or has an unsupported type in the alternatives dataset.")
