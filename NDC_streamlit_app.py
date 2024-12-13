@@ -83,11 +83,11 @@ else:
 
 
 # Map insurance input back to short code
-insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if insurance_input else None
+insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if insurance_input and not df[df['Ins Full Name'] == insurance_input].empty else None
 insurance_code = insurance_code[0] if insurance_code else None
 
 # Filter data based on inputs
-filtered_df = df[df['Drug Name'].str.contains(drug_name_input, na=False, case=False)] if drug_name_input else df
+filtered_df = df[df['Drug Name'] == drug_name_input] if drug_name_input else df
 if ndc_input:
     filtered_df = filtered_df[filtered_df['NDC'] == ndc_input]
 if insurance_code:
