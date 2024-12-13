@@ -142,7 +142,7 @@ if drug_name_input and insurance_code and not filtered_df.empty:
             st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
-            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']:.2f}"))
+            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']:.2f}")
     else:
         st.info("No alternatives available for drugs in the 'Other' class.")
 else:
