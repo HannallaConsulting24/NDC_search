@@ -70,7 +70,6 @@ with col2:
 st.markdown("### Input your search criteria below:")
 
 # Input Fields
-st.markdown("#### Required Input:")
 drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['Drug Name'].unique()), format_func=lambda x: x if x else "Type to search...")
 
 if drug_name_input:
