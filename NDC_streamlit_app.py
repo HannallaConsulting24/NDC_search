@@ -107,7 +107,7 @@ if drug_name_input and insurance_code and not filtered_df.empty:
     st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
     st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
     st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
-    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}"))
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}")
     st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
