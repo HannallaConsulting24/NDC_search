@@ -8,13 +8,21 @@ def load_data():
     file_path = 'Final_Updated_Classifications.csv'
     return pd.read_csv(file_path).drop_duplicates()
 
+@st.cache_data
+def load_reclassified_data():
+    file_path = 'Reclassified_DrugDatabase.csv'
+    return pd.read_csv(file_path).drop_duplicates()
+
 # Load the data
 df = load_data()
+reclassified_df = load_reclassified_data()
 
 # Ensure the NDC and Drug Name columns are strings for comparison and strip whitespace
 df['NDC'] = df['NDC'].astype(str).str.strip()
 df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
 df['class'] = df['class'].astype(str).str.strip()
+reclassified_df['NDC'] = reclassified_df['NDC'].astype(str).str.strip()
+reclassified_df['Drug Name'] = reclassified_df['Drug Name'].astype(str).str.strip()
 
 # Ensure Date column is parsed as datetime for sorting
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -81,10 +89,8 @@ else:
     insurance_input = None
     ndc_input = None
 
-
 # Map insurance input back to short code
 insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if insurance_input and not df[df['Ins Full Name'] == insurance_input].empty else None
-insurance_code = insurance_code[0] if insurance_code else None
 
 # Filter data based on inputs
 filtered_df = df
@@ -97,6 +103,22 @@ if insurance_input:
 
 # Sort filtered data by latest date
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
+
+if drug_name_input and ndc_input and filtered_df.empty:
+    st.subheader(f"No insurance data available for {drug_name_input} with NDC {ndc_input}")
+
+    # Fetch details from reclassified database
+    reclassified_details = reclassified_df[(reclassified_df['Drug Name'] == drug_name_input) & (reclassified_df['NDC'] == ndc_input)]
+    if not reclassified_details.empty:
+        st.markdown(f"### Drug Name: **{drug_name_input}**")
+        first_reclassified_result = reclassified_details.iloc[0]
+        st.markdown(f"- **Manufacturer (MFG)**: {first_reclassified_result['MFG']}")
+        st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['ACQ']}")
+        st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['AWP']}")
+        st.markdown(f"- **RxCui**: {first_reclassified_result['RxCui']}")
+        st.markdown(f"- **Drug Class**: {first_reclassified_result['Drug Class']}")
+    else:
+        st.warning("No additional data found in the reclassified database.")
 
 if drug_name_input and insurance_code and not filtered_df.empty:
     st.subheader(f"Latest Billing Details :")
