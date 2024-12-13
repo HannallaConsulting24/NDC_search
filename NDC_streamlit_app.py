@@ -53,6 +53,7 @@ if not filtered_df.empty:
     # Display selected drug details
     first_valid_result = filtered_df.iloc[0]
     st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
+    st.markdown(f"- **Class**: {first_valid_result['class']}")
     st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
@@ -61,25 +62,28 @@ if not filtered_df.empty:
 
     # Find alternatives by class
     drug_class = first_valid_result['class']
-    alternatives = df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
+    if drug_class.lower() != 'other':
+        alternatives = df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
 
-    st.subheader("Alternative Drugs in the Same Class")
-    st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
+        st.subheader("Alternative Drugs in the Same Class")
+        st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
 
-    # Sorting options
-    sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
-    if sort_option == "Highest Net Profit":
-        alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
-    elif sort_option == "Lowest Copay":
-        alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
+        # Sorting options
+        sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
+        if sort_option == "Highest Net Profit":
+            alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+        elif sort_option == "Lowest Copay":
+            alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
 
-    # Display alternatives
-    for _, alt_row in alternatives.iterrows():
-        st.markdown("---")
-        st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
-        st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-        st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
-        st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
-        st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
+        # Display alternatives
+        for _, alt_row in alternatives.iterrows():
+            st.markdown("---")
+            st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
+            st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
+            st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
+            st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
+            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
+    else:
+        st.info("No alternatives available for drugs in the 'Other' class.")
 else:
     st.warning("No results found for the selected criteria.")
