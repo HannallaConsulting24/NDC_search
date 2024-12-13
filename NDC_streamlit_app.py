@@ -2,101 +2,72 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Load the primary dataset
+# Load the datasets
 @st.cache_data
 def load_data():
-    file_path = 'Updated_Dataset_with_Net_Columns.csv'
+    file_path = 'Final_Updated_Classifications.csv'
     return pd.read_csv(file_path).drop_duplicates()
 
-data = load_data()
+# Load the data
+df = load_data()
 
-# Load the alternatives dataset
-@st.cache_data
-def load_alternative_data():
-    alternative_file_path = 'updated_dataset_with_net_columns (1).csv'
-    return pd.read_csv(alternative_file_path).drop_duplicates()
+# Ensure the NDC and Drug Name columns are strings for comparison and strip whitespace
+df['NDC'] = df['NDC'].astype(str).str.strip()
+df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
+df['class'] = df['class'].astype(str).str.strip()
 
-alternative_data = load_alternative_data()
+# Display logo and title
+st.title("Enhanced Medication Guiding Tool 💊")
+st.markdown("### Input your search criteria below:")
 
-# Ensure relevant columns are properly formatted
-data['Drug Name'] = data['Drug Name'].str.strip()
-data['NDC'] = data['NDC'].astype(str).str.strip()
+# Input Fields
+st.markdown("#### Required Input:")
+drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['Drug Name'].unique()), format_func=lambda x: x if x else "Type to search...")
 
-# Title and Logo
-title_col1, title_col2 = st.columns([1, 4])
-with title_col1:
-    st.image("img.png", use_container_width=True)
-with title_col2:
-    st.title("Enhanced Medication Query Tool 💊")
+st.markdown("#### Optional Filters:")
+ndc_input = st.selectbox("Select an NDC (Optional):", options=[""] + list(df['NDC'].unique()), format_func=lambda x: x if x else "All NDCs")
+insurance_input = st.selectbox("Select Insurance (Optional):", options=[""] + list(df['Ins'].unique()), format_func=lambda x: x if x else "All Insurances")
 
-# Input Section
-st.markdown("### Search Criteria")
+# Filter data based on inputs
+filtered_df = df[df['Drug Name'].str.contains(drug_name_input, na=False, case=False)] if drug_name_input else df
+if ndc_input:
+    filtered_df = filtered_df[filtered_df['NDC'] == ndc_input]
+if insurance_input:
+    filtered_df = filtered_df[filtered_df['Ins'] == insurance_input]
 
-# Input all fields at once
-input_col1, input_col2, input_col3 = st.columns(3)
+if not filtered_df.empty:
+    st.subheader(f"Results for {drug_name_input}:")
 
-with input_col1:
-    drug_name = st.selectbox("Type or Select Drug Name:", options=["Type here..."] + list(data['Drug Name'].unique()), index=0)
+    # Display selected drug details
+    first_valid_result = filtered_df.iloc[0]
+    st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
+    st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
+    st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
+    st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']}")
+    st.markdown("---")
 
-with input_col2:
-    ndc_options = list(data['NDC'].unique())
-    selected_ndc = st.selectbox("Type or Select NDC:", options=["Type here..."] + list(ndc_options), index=0)
+    # Find alternatives by class
+    drug_class = first_valid_result['class']
+    alternatives = df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
 
-with input_col3:
-    insurance_options = list(data['Ins'].unique())
-    selected_insurance = st.selectbox("Type or Select Insurance:", options=["Type here..."] + list(insurance_options), index=0)
+    st.subheader("Alternative Drugs in the Same Class")
+    st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
 
-# Filter and display data if all fields are selected
-if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_insurance != "Type here...":
-    filtered_data = data[(data['Drug Name'] == drug_name) & (data['NDC'] == selected_ndc) & (data['Ins'] == selected_insurance)]
-    filtered_data = filtered_data.sort_values(by='Date', ascending=False).head(1)
+    # Sorting options
+    sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
+    if sort_option == "Highest Net Profit":
+        alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+    elif sort_option == "Lowest Copay":
+        alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
 
-    if not filtered_data.empty:
-        st.subheader("Selected Drug Details")
-        for _, row in filtered_data.iterrows():
-            st.markdown("---")
-            st.markdown(f"- **Date**: {row['Date']}")
-            st.markdown(f"- **Script**: {row['Script']}")
-            st.markdown(f"- **Copay**: {row['Pat Pay']}")
-            st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
-            st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-            st.markdown(f"- **Net Profit**: {row['net_2']}")
-
-        # Alternatives by RxCui from the alternative dataset
-        st.subheader("Alternative Drugs by RxCui")
-        if 'RxCui' in alternative_data.columns:
-            if not alternative_data[alternative_data['NDC'] == selected_ndc].empty:
-                drug_rxcui = alternative_data[alternative_data['NDC'] == selected_ndc]['RxCui'].iloc[0]
-            else:
-                drug_rxcui = None
-            if drug_rxcui is not None:
-                alternatives = alternative_data[(alternative_data['RxCui'] == drug_rxcui) & (alternative_data['NDC'] != selected_ndc)]
-            else:
-                alternatives = pd.DataFrame()
-
-            st.markdown(f"Found {len(alternatives)} alternatives with the same RxCui.")
-
-            sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
-            if sort_option == "Highest Net Profit":
-                if 'net_2' in alternatives.columns and alternatives['net_2'].notnull().any() and alternatives['net_2'].dtype in [np.float64, np.int64]:
-                    alternatives = alternatives[alternatives['net_2'].notnull()]
-                    alternatives = alternatives.sort_values(by="net_2", ascending=False)
-                else:
-                    st.warning("Column 'net_2' is missing, contains invalid data, or has an unsupported type in the alternatives dataset.")
-            elif sort_option == "Lowest Copay":
-                if 'Pat Pay' in alternatives.columns:
-                    alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
-                else:
-                    st.warning("Column 'Pat Pay' not found in alternatives dataset.")
-
-            for _, alt_row in alternatives.iterrows():
-                st.markdown("---")
-                st.markdown(f"### Alternative: {alt_row['Drug Name']}")
-                st.markdown(f"- **NDC**: {alt_row['NDC']}")
-                st.markdown(f"- **RxCui**: {alt_row['RxCui']}")
-                st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Net Profit**: {alt_row['net_2']}")
-        else:
-            st.warning("RxCui column not found in the alternatives dataset.")
-    else:
-        st.warning("No data matches your search criteria.")
+    # Display alternatives
+    for _, alt_row in alternatives.iterrows():
+        st.markdown("---")
+        st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
+        st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
+        st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
+        st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
+        st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
+else:
+    st.warning("No results found for the selected criteria.")
