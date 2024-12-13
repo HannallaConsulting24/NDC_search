@@ -87,11 +87,13 @@ insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if in
 insurance_code = insurance_code[0] if insurance_code else None
 
 # Filter data based on inputs
-filtered_df = df[df['Drug Name'] == drug_name_input] if drug_name_input else df
+filtered_df = df
+if drug_name_input:
+    filtered_df = filtered_df[filtered_df['Drug Name'] == drug_name_input]
 if ndc_input:
     filtered_df = filtered_df[filtered_df['NDC'] == ndc_input]
-if insurance_code:
-    filtered_df = filtered_df[filtered_df['Ins'] == insurance_code]
+if insurance_input:
+    filtered_df = filtered_df[filtered_df['Ins Full Name'] == insurance_input]
 
 # Sort filtered data by latest date
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
