@@ -63,7 +63,10 @@ if not filtered_df.empty:
     # Find alternatives by class
     drug_class = first_valid_result['class']
     if drug_class.lower() != 'other':
-        alternatives = df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
+        # Get the latest entry for each alternative drug name
+        alternatives = (df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
+                        .sort_values(by='Date', ascending=False)
+                        .drop_duplicates(subset=['Drug Name']))
 
         st.subheader("Alternative Drugs in the Same Class")
         st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
@@ -79,6 +82,7 @@ if not filtered_df.empty:
         for _, alt_row in alternatives.iterrows():
             st.markdown("---")
             st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
+            st.markdown(f"- **Class**: {alt_row['class']}")
             st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
