@@ -61,7 +61,7 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             st.markdown(f"- **Copay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-            st.markdown(f"- **Net Profit**: {(row['net_2']}")
+            st.markdown(f"- **Net Profit**: {row['net_2']}")
 
         # Alternatives by Class from the alternative dataset
         st.subheader("Alternative Drugs by Class")
