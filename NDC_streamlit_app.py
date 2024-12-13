@@ -20,7 +20,7 @@ df['class'] = df['class'].astype(str).str.strip()
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
 # Calculate Net Profit dynamically
-df['Net Profit'] = (df['Pat Pay'] + df['Ins Pay']) - df['ACQ']
+df['Net Profit'] = ((df['Pat Pay'] + df['Ins Pay']) - df['ACQ']).round(2)
 
 # Insurance mapping (short to full name)
 insurance_mapping = {
@@ -107,7 +107,7 @@ if drug_name_input and insurance_code and not filtered_df.empty:
     st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
     st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
     st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
-    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']}")
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}"))
     st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
@@ -142,7 +142,7 @@ if drug_name_input and insurance_code and not filtered_df.empty:
             st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
-            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']}")
+            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']:.2f}"))
     else:
         st.info("No alternatives available for drugs in the 'Other' class.")
 else:
