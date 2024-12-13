@@ -61,6 +61,8 @@ if drug_name_input and not filtered_df.empty:
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
     st.markdown(f"- **Class**: {first_valid_result['class']}")
+    st.markdown(f"- **Script**: {first_valid_result['Script']}")
+    st.markdown(f"- **Date**: {first_valid_result['Date']}")
     st.markdown("---")
 
     # Find alternatives by class
