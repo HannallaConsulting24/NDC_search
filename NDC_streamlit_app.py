@@ -108,7 +108,8 @@ if drug_name_input and ndc_input and filtered_df.empty:
     st.subheader(f"No insurance data available for {drug_name_input} with NDC {ndc_input}")
 
     # Fetch details from reclassified database
-    reclassified_details = reclassified_df[(reclassified_df['Drug Name'] == drug_name_input) & (reclassified_df['NDC'] == ndc_input)]
+    formatted_ndc = f"{ndc_input[:5]}-{ndc_input[5:9]}-{ndc_input[9:]}"
+    reclassified_details = reclassified_df[reclassified_df['NDC'] == formatted_ndc]
     if not reclassified_details.empty:
         st.markdown(f"### Drug Name: **{drug_name_input}**")
         first_reclassified_result = reclassified_details.iloc[0]
@@ -116,7 +117,7 @@ if drug_name_input and ndc_input and filtered_df.empty:
         st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['ACQ']}")
         st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['AWP']}")
         st.markdown(f"- **RxCui**: {first_reclassified_result['RxCui']}")
-        st.markdown(f"- **Drug Class**: {first_reclassified_result['Drug Class']}")
+        
     else:
         st.warning("No additional data found in the reclassified database.")
 
