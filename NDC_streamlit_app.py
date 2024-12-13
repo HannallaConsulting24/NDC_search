@@ -61,7 +61,7 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
             st.markdown(f"- **Copay**: {row['Pat Pay']}")
             st.markdown(f"- **Insurance Pay**: {row['Ins Pay']}")
             st.markdown(f"- **Acquisition Cost**: {row['ACQ']}")
-            st.markdown(f"- **Net Profit**: {(row['Pat Pay'] + row['Ins Pay']) - row['ACQ']}")
+            st.markdown(f"- **Net Profit**: {(row['net_2']}")
 
         # Alternatives by Class from the alternative dataset
         st.subheader("Alternative Drugs by Class")
@@ -93,8 +93,9 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
                 st.markdown("---")
                 st.markdown(f"### Alternative: {alt_row['Drug Name']}")
                 st.markdown(f"- **NDC**: {alt_row['NDC']}")
+                st.markdown(f"- **Class**: {alt_row['Class']}")
+                st.markdown(f"- **RxCui**: {alt_row['RxCui']}")
                 st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Net Profit1**: {alt_row['net_1']}")
-                st.markdown(f"- **Net Profit2**: {alt_row['net_2']}")
+                st.markdown(f"- **Net Profit**: {alt_row['net_2']}")
     else:
         st.warning("No data matches your search criteria.")
