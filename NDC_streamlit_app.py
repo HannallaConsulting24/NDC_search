@@ -95,6 +95,6 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
                 st.markdown(f"- **Class**: {alt_row['Class']}")
                 st.markdown(f"- **RxCui**: {alt_row['RxCui']}")
                 st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
-                st.markdown(f"- **Net Profit**: {alt_row['net_2']}"))
+                st.markdown(f"- **Net Profit**: {alt_row['net_2']}")
     else:
         st.warning("No data matches your search criteria.")
