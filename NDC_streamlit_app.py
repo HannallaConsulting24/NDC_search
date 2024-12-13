@@ -79,10 +79,10 @@ if drug_name != "Type here..." and selected_ndc != "Type here..." and selected_i
 
             sort_option = st.radio("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
             if sort_option == "Highest Net Profit":
-                if 'net_2' in alternatives.columns and not alternatives['net_2'].isnull().all():
+                if 'net_2' in alternatives.columns and alternatives['net_2'].notnull().any():
                     alternatives = alternatives.sort_values(by="net_2", ascending=False)
                 else:
-                    st.warning("Column 'net_2' is missing or contains no valid data in the alternatives dataset.")
+                    st.warning("Column 'net_2' is either missing or contains only invalid data in the alternatives dataset.")
             elif sort_option == "Lowest Copay":
                 if 'Pat Pay' in alternatives.columns:
                     alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
