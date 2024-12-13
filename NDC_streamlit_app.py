@@ -34,8 +34,8 @@ st.markdown("#### Required Input:")
 drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['Drug Name'].unique()), format_func=lambda x: x if x else "Type to search...")
 
 st.markdown("#### Optional Filters:")
-ndc_input = st.selectbox("Select an NDC (Optional):", options=[""] + list(df['NDC'].unique()), format_func=lambda x: x if x else "All NDCs")
-insurance_input = st.selectbox("Select Insurance (Optional):", options=[""] + list(df['Ins'].unique()), format_func=lambda x: x if x else "All Insurances")
+ndc_input = st.selectbox("Select an NDC (Optional):", options=list(df['NDC'].unique()), format_func=lambda x: x if x else "All NDCs")
+insurance_input = st.selectbox("Select Insurance (Optional):", options=list(df['Ins'].unique()), format_func=lambda x: x if x else "All Insurances")
 
 # Filter data based on inputs
 filtered_df = df[df['Drug Name'].str.contains(drug_name_input, na=False, case=False)] if drug_name_input else df
