@@ -79,7 +79,7 @@ if drug_name_input:
 else:
     ndc_input = None
 
-insurance_input = st.selectbox("Select Insurance:", options=[""] + list(insurance_mapping.values()), format_func=lambda x: x if x else "Type to search...", format_func=lambda x: x if x else "Type to search...")
+insurance_input = st.selectbox("Select Insurance:", options=[""] + list(insurance_mapping.values()), format_func=lambda x: x if x else "Type to search...")
 
 # Map insurance input back to short code
 insurance_code = [k for k, v in insurance_mapping.items() if v == insurance_input]
