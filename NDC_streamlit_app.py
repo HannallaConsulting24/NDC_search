@@ -17,11 +17,11 @@ def load_reclassified_data():
 df = load_data()
 reclassified_df = load_reclassified_data()
 
-# Ensure the NDC and Drug Name columns are strings for comparison and strip whitespace
+# Ensure the ndc and Drug Name columns are strings for comparison and strip whitespace
 df['NDC'] = df['NDC'].astype(str).str.strip()
 df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
 df['class'] = df['class'].astype(str).str.strip()
-reclassified_df['NDC'] = reclassified_df['NDC'].astype(str).str.strip()
+reclassified_df['ndc'] = reclassified_df['ndc'].astype(str).str.strip()
 reclassified_df['Drug Name'] = reclassified_df['Drug Name'].astype(str).str.strip()
 reclassified_df['class'] = reclassified_df['class'].astype(str).str.strip()
 
@@ -110,7 +110,7 @@ if drug_name_input and ndc_input and filtered_df.empty:
 
     # Fetch details from reclassified database
     formatted_ndc = f"{ndc_input[:5]}-{ndc_input[5:9]}-{ndc_input[9:]}"
-    reclassified_details = reclassified_df[reclassified_df['NDC'] == formatted_ndc]
+    reclassified_details = reclassified_df[reclassified_df['ndc'] == formatted_ndc]
     if not reclassified_details.empty:
         st.markdown(f"### Drug Name: **{drug_name_input}**")
         first_reclassified_result = reclassified_details.iloc[0]
