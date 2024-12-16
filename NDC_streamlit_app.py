@@ -17,10 +17,10 @@ def load_reclassified_data():
 df = load_data()
 reclassified_df = load_reclassified_data()
 
-# Ensure the ndc and drug_name columns are strings for comparison and strip whitespace
+# Ensure the NDC and Drug Name columns are strings for comparison and strip whitespace
 df['NDC'] = df['NDC'].astype(str).str.strip()
-df['drug_name'] = df['drug_name'].astype(str).str.strip()
-df['drug_class'] = df['drug_class'].astype(str).str.strip()
+df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
+df['class'] = df['class'].astype(str).str.strip()
 reclassified_df['ndc'] = reclassified_df['ndc'].astype(str).str.strip()
 reclassified_df['drug_name'] = reclassified_df['drug_name'].astype(str).str.strip()
 reclassified_df['drug_class'] = reclassified_df['drug_class'].astype(str).str.strip()
@@ -80,12 +80,12 @@ with col2:
 st.markdown("### Input your search criteria below:")
 
 # Input Fields
-drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['drug_name'].unique()), format_func=lambda x: x if x else "Type to search...")
+drug_name_input = st.selectbox("Search for a Drug Name:", options=[""] + list(df['Drug Name'].unique()), format_func=lambda x: x if x else "Type to search...")
 
 if drug_name_input:
-    insurances_for_drug = df[df['drug_name'] == drug_name_input][['Ins Full Name', 'Ins']].dropna().drop_duplicates(subset=['Ins Full Name'])['Ins Full Name'].unique()
+    insurances_for_drug = df[df['Drug Name'] == drug_name_input][['Ins Full Name', 'Ins']].dropna().drop_duplicates(subset=['Ins Full Name'])['Ins Full Name'].unique()
     insurance_input = st.selectbox("Select Insurance:", options=[opt for opt in [""] + list(insurances_for_drug) if opt.strip()], format_func=lambda x: x if x else "Type to search...")
-    ndcs_for_drug = df[df['drug_name'] == drug_name_input]['NDC'].unique()
+    ndcs_for_drug = df[df['Drug Name'] == drug_name_input]['NDC'].unique()
     ndc_input = st.selectbox("Select an NDC:", options=ndcs_for_drug, format_func=lambda x: x if x else "Type to search...")
 else:
     insurance_input = None
@@ -97,7 +97,7 @@ insurance_code = df[df['Ins Full Name'] == insurance_input]['Ins'].iloc[0] if in
 # Filter data based on inputs
 filtered_df = df
 if drug_name_input:
-    filtered_df = filtered_df[filtered_df['drug_name'] == drug_name_input]
+    filtered_df = filtered_df[filtered_df['Drug Name'] == drug_name_input]
 if ndc_input:
     filtered_df = filtered_df[filtered_df['NDC'] == ndc_input]
 if insurance_input:
