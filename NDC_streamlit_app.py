@@ -10,7 +10,7 @@ def load_data():
 
 @st.cache_data
 def load_reclassified_data():
-    file_path = 'Updated_Reclassified_DrugDatabase.csv'
+    file_path = 'Reclassified_DrugDatabase.csv'
     return pd.read_csv(file_path).drop_duplicates()
 
 # Load the data
@@ -21,16 +21,14 @@ reclassified_df = load_reclassified_data()
 df['NDC'] = df['NDC'].astype(str).str.strip()
 df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
 df['class'] = df['class'].astype(str).str.strip()
-reclassified_df['ndc'] = reclassified_df['ndc'].astype(str).str.strip()
-reclassified_df['drug_name'] = reclassified_df['drug_name'].astype(str).str.strip()
-reclassified_df['drug_class'] = reclassified_df['drug_class'].astype(str).str.strip()
+reclassified_df['NDC'] = reclassified_df['NDC'].astype(str).str.strip()
+reclassified_df['Drug Name'] = reclassified_df['Drug Name'].astype(str).str.strip()
 
 # Ensure Date column is parsed as datetime for sorting
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
 # Calculate Net Profit dynamically
-if 'Net Profit' not in df.columns:
-    df['Net Profit'] = ((df['Pat Pay'] + df['Ins Pay']) - df['ACQ']).round(2)
+df['Net Profit'] = ((df['Pat Pay'] + df['Ins Pay']) - df['ACQ']).round(2)
 
 # Insurance mapping (short to full name)
 insurance_mapping = {
@@ -111,45 +109,62 @@ if drug_name_input and ndc_input and filtered_df.empty:
 
     # Fetch details from reclassified database
     formatted_ndc = f"{ndc_input[:5]}-{ndc_input[5:9]}-{ndc_input[9:]}"
-    reclassified_details = reclassified_df[reclassified_df['ndc'] == formatted_ndc]
+    reclassified_details = reclassified_df[reclassified_df['NDC'] == formatted_ndc]
     if not reclassified_details.empty:
         st.markdown(f"### Drug Name: **{drug_name_input}**")
         first_reclassified_result = reclassified_details.iloc[0]
-        st.markdown(f"- **Manufacturer (MFG)**: {first_reclassified_result['mfg']}")
-        st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['acq']}")
-        st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['awp']}")
-        st.markdown(f"- **RxCui**: {first_reclassified_result['rxcui']}")
+        st.markdown(f"- **Manufacturer (MFG)**: {first_reclassified_result['MFG']}")
+        st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['ACQ']}")
+        st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['AWP']}")
+        st.markdown(f"- **RxCui**: {first_reclassified_result['RxCui']}")
+        
+    else:
+        st.warning("No additional data found in the reclassified database.")
 
-        # Find alternatives by class
-        drug_class = first_reclassified_result['drug_class']
-        alt_reclassified = reclassified_df[(reclassified_df['drug_class'] == drug_class) & (reclassified_df['drug_name'] != drug_name_input)]
-        alt_original = df[(df['class'] == drug_class) & (df['Drug Name'] != drug_name_input)]
-        alternatives = pd.concat([alt_reclassified, alt_original], ignore_index=True)
+if drug_name_input and insurance_code and not filtered_df.empty:
+    st.subheader(f"Latest Billing Details :")
+
+    # Display selected drug details
+    first_valid_result = filtered_df.iloc[0]
+    st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
+    st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
+    st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
+    st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}")
+    st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
+    st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
+    st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
+    st.markdown(f"- **Class**: {first_valid_result['class']}")
+    st.markdown(f"- **Script**: {first_valid_result['Script']}")
+    st.markdown(f"- **Date**: {first_valid_result['Date'].strftime('%m/%d/%Y') if pd.notnull(first_valid_result['Date']) else 'Not Available'}")
+    st.markdown("---")
+
+    # Find alternatives by class
+    drug_class = first_valid_result['class']
+    if drug_class.lower() != 'other':
+        # Get the latest entry for each alternative drug name
+        alternatives = (df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
+                        .sort_values(by='Date', ascending=False)
+                        .drop_duplicates(subset=['Drug Name']))
 
         st.subheader("Alternative Drugs in the Same Class")
         st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
 
         # Sorting options
-        sort_option = st.selectbox("Sort Alternatives By:", ["Lowest Acquisition Cost", "Alphabetical Drug Name"])
-        if sort_option == "Lowest Acquisition Cost":
-            alternatives = alternatives.sort_values(by="acq", ascending=True, errors='ignore')
-        elif sort_option == "Alphabetical Drug Name":
-            alternatives = alternatives.sort_values(by="drug_name", errors='ignore')
+        sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
+        if sort_option == "Highest Net Profit":
+            alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+        elif sort_option == "Lowest Copay":
+            alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
 
         # Display alternatives
         for _, alt_row in alternatives.iterrows():
             st.markdown("---")
-            drug_name_display = alt_row.get('drug_name', alt_row.get('Drug Name', 'N/A'))
-            drug_class_display = alt_row.get('drug_class', alt_row.get('class', 'N/A'))
-            mfg_display = alt_row.get('mfg', 'N/A')
-            acq_display = alt_row.get('acq', alt_row.get('ACQ', 'N/A'))
-            awp_display = alt_row.get('awp', 'N/A')
-            rxcui_display = alt_row.get('rxcui', alt_row.get('RxCui', 'N/A'))
-            st.markdown(f"### Alternative Drug Name: **{drug_name_display}**")
-            st.markdown(f"- **Class**: {drug_class_display}")
-            st.markdown(f"- **Manufacturer (MFG)**: {mfg_display}")
-            st.markdown(f"- **Acquisition Cost (ACQ)**: {acq_display}")
-            st.markdown(f"- **Average Wholesale Price (AWP)**: {awp_display}")
-            st.markdown(f"- **RxCui**: {rxcui_display}")
+            st.markdown(f"### Alternative Drug Name: **{alt_row['Drug Name']}**")
+            st.markdown(f"- **Class**: {alt_row['class']}")
+            st.markdown(f"- **Copay**: {alt_row['Pat Pay']}")
+            st.markdown(f"- **Insurance Pay**: {alt_row['Ins Pay']}")
+            st.markdown(f"- **Acquisition Cost**: {alt_row['ACQ']}")
+            st.markdown(f"- **Net Profit**: {alt_row['Net Profit']:.2f}")
     else:
-        st.warning("No additional data found in the reclassified database.")
+        st.info("No alternatives available for drugs in the 'Other' class.")
