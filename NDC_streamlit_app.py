@@ -165,12 +165,14 @@ if drug_name_input and insurance_code and not filtered_df.empty:
 
         # Display alternatives
         for _, alt_row in alternatives.iterrows():
+            ndc_formatted = alt_row.get('ndc', '').replace('-', '') if 'ndc' in alt_row else alt_row.get('NDC', '')
             st.markdown("---")
             st.markdown(f"### Alternative Drug Name: **{alt_row.get('Drug Name', alt_row.get('drug_name'))}**")
             st.markdown(f"- **Class**: {alt_row.get('class', alt_row.get('drug_class'))}")
             st.markdown(f"- **Copay**: {alt_row.get('Pat Pay', 'N/A')}")
             st.markdown(f"- **Insurance Pay**: {alt_row.get('Ins Pay', 'N/A')}")
             st.markdown(f"- **Acquisition Cost**: {alt_row.get('ACQ', alt_row.get('acq'))}")
+            st.markdown(f"- **NDC**: {ndc_formatted}")
             st.markdown(f"- **Net Profit**: {alt_row.get('Net Profit', 'N/A'):.2f}" if 'Net Profit' in alt_row else "")
     else:
         st.info("No alternatives available for drugs in the 'Other' class.")
