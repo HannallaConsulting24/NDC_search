@@ -118,6 +118,28 @@ if drug_name_input and ndc_input and filtered_df.empty:
         st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['awp']}")
         st.markdown(f"- **RxCui**: {first_reclassified_result['rxcui']}")
         
+        # Fetch alternatives based on the drug class
+        drug_class = first_reclassified_result['drug_class']
+        alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class].drop_duplicates(subset=['drug_name'])
+        st.subheader("Alternative Drugs in the Same Class")
+        st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
+
+        # Sorting options
+        sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest AWP"])
+        if sort_option == "Highest Net Profit" and 'Net Profit' in alternatives.columns:
+            alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
+        elif sort_option == "Lowest AWP":
+            alternatives = alternatives.sort_values(by="awp", ascending=True)
+
+        # Display alternatives
+        for _, alt_row in alternatives.iterrows():
+            st.markdown("---")
+            st.markdown(f"### Alternative Drug Name: **{alt_row['drug_name']}**")
+            st.markdown(f"- **Class**: {alt_row['drug_class']}")
+            st.markdown(f"- **Manufacturer (MFG)**: {alt_row['mfg']}")
+            st.markdown(f"- **Acquisition Cost (ACQ)**: {alt_row['acq']}")
+            st.markdown(f"- **Average Wholesale Price (AWP)**: {alt_row['awp']}")
+            st.markdown(f"- **NDC**: {alt_row['ndc']}")
     else:
         st.warning("No additional data found in the reclassified database.")
 
@@ -146,10 +168,6 @@ if drug_name_input and insurance_code and not filtered_df.empty:
         alternatives = (df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
                         .sort_values(by='Date', ascending=False)
                         .drop_duplicates(subset=['Drug Name']))
-
-        # If no alternatives found in Final_Updated_Classifications, fetch from Updated_Reclassified_DrugDatabase
-        if alternatives.empty:
-            alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class].drop_duplicates(subset=['drug_name'])
 
         st.subheader("Alternative Drugs in the Same Class")
         st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
