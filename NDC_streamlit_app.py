@@ -105,31 +105,55 @@ if insurance_input:
 # Sort filtered data by latest date
 filtered_df = filtered_df.sort_values(by='Date', ascending=False)
 
-if drug_name_input and ndc_input and filtered_df.empty:
+if drug_name_input and ndc_input and not filtered_df.empty:
+    st.subheader("Drug Details")
+    first_valid_result = filtered_df.iloc[0]
+    st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
+    st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
+    st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
+    st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
+    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}")
+    st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
+    st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
+    st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
+    st.markdown(f"- **Class**: {first_valid_result['class']}")
+    st.markdown(f"- **Date**: {first_valid_result['Date']}")
+    st.markdown("---")
+    
+    # Alternatives from main dataset
+    drug_class = first_valid_result['class']
+    alternatives = df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
+    if not alternatives.empty:
+        st.subheader("Alternative Drugs in the Same Class")
+        for _, alt_row in alternatives.iterrows():
+            st.markdown(f"- **Drug Name**: {alt_row['Drug Name']} | **NDC**: {alt_row['NDC']} | **Net Profit**: {alt_row['Net Profit']:.2f}")
+    else:
+        # Fetch alternatives from reclassified dataset if no alternatives in main dataset
+        reclassified_alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class]
+        if not reclassified_alternatives.empty:
+            st.subheader("Alternative Drugs (Reclassified Database)")
+            for _, alt_row in reclassified_alternatives.iterrows():
+                st.markdown(f"- **Drug Name**: {alt_row['drug_name']} | **Manufacturer**: {alt_row['mfg']} | **ACQ**: {alt_row['acq']} | **AWP**: {alt_row['awp']}")
+else:
+    # If no data found in main dataset
     st.markdown(f"<p style='color: red; font-weight: bold;'>No insurance data available for {drug_name_input} with NDC {ndc_input}</p>", unsafe_allow_html=True)
-
+    
     # Fetch details from reclassified database
     formatted_ndc = f"{ndc_input[:5]}-{ndc_input[5:9]}-{ndc_input[9:]}"
     reclassified_details = reclassified_df[reclassified_df['ndc'] == formatted_ndc]
     if not reclassified_details.empty:
-        st.markdown(f"### Drug Name: **{drug_name_input}**")
-        first_reclassified_result = reclassified_details.iloc[0]
-        st.markdown(f"- **Manufacturer (MFG)**: {first_reclassified_result['mfg']}")
-        st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['acq']}")
-        st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['awp']}")
-        st.markdown(f"- **RxCui**: {first_reclassified_result['rxcui']}")
-
-        # Fetch alternatives based on drug_class
-        drug_class = first_reclassified_result['drug_class']
-        alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class]
-        st.subheader("Alternative Drugs in the Same Class")
-        for _, alt_row in alternatives.iterrows():
-            st.markdown("---")
-            st.markdown(f"### Alternative Drug Name: **{alt_row['drug_name']}**")
-            st.markdown(f"- **Manufacturer**: {alt_row['mfg']}")
-            st.markdown(f"- **Acquisition Cost (ACQ)**: {alt_row['acq']}")
-            st.markdown(f"- **Average Wholesale Price (AWP)**: {alt_row['awp']}")
-            st.markdown(f"- **RxCui**: {alt_row['rxcui']}")
+        st.markdown(f"### Drug Name: **{reclassified_details.iloc[0]['drug_name']}**")
+        st.markdown(f"- **Manufacturer (MFG)**: {reclassified_details.iloc[0]['mfg']}")
+        st.markdown(f"- **Acquisition Cost (ACQ)**: {reclassified_details.iloc[0]['acq']}")
+        st.markdown(f"- **Average Wholesale Price (AWP)**: {reclassified_details.iloc[0]['awp']}")
+        st.markdown(f"- **RxCui**: {reclassified_details.iloc[0]['rxcui']}")
         
+        # Fetch alternatives based on drug_class
+        drug_class = reclassified_details.iloc[0]['drug_class']
+        reclassified_alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class]
+        if not reclassified_alternatives.empty:
+            st.subheader("Alternative Drugs in the Same Class")
+            for _, alt_row in reclassified_alternatives.iterrows():
+                st.markdown(f"- **Drug Name**: {alt_row['drug_name']} | **Manufacturer**: {alt_row['mfg']} | **ACQ**: {alt_row['acq']} | **AWP**: {alt_row['awp']}")
     else:
         st.warning("No additional data found in the reclassified database.")
