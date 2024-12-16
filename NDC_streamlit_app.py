@@ -148,11 +148,14 @@ if drug_name_input and insurance_code and not filtered_df.empty:
 
     # Display selected drug details
     first_valid_result = filtered_df.iloc[0]
+    net_profit_calculation = f"({first_valid_result['Pat Pay']} + {first_valid_result['Ins Pay']}) - {first_valid_result['ACQ']}"
+    net_profit_value = first_valid_result['Net Profit']
+
     st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
     st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
     st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
     st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
-    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}")
+    st.markdown(f"- **Net Profit**: {net_profit_value:.2f} (Calculation: {net_profit_calculation})")
     st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
     st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
     st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
