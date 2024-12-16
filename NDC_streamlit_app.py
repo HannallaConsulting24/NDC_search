@@ -20,9 +20,10 @@ reclassified_df = load_reclassified_data()
 # Ensure the NDC and Drug Name columns are strings for comparison and strip whitespace
 df['NDC'] = df['NDC'].astype(str).str.strip()
 df['Drug Name'] = df['Drug Name'].astype(str).str.strip()
-df['class'] = df['class'].astype(str).str.strip()
+df['class'] = df['class'].astype(str).str.strip().str.lower()
 reclassified_df['ndc'] = reclassified_df['ndc'].astype(str).str.strip()
 reclassified_df['drug_name'] = reclassified_df['drug_name'].astype(str).str.strip()
+reclassified_df['drug_class'] = reclassified_df['drug_class'].astype(str).str.strip().str.lower()
 
 # Ensure Date column is parsed as datetime for sorting
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
@@ -117,59 +118,18 @@ if drug_name_input and ndc_input and filtered_df.empty:
         st.markdown(f"- **Acquisition Cost (ACQ)**: {first_reclassified_result['acq']}")
         st.markdown(f"- **Average Wholesale Price (AWP)**: {first_reclassified_result['awp']}")
         st.markdown(f"- **RxCui**: {first_reclassified_result['rxcui']}")
+
+        # Fetch alternatives based on drug_class
+        drug_class = first_reclassified_result['drug_class']
+        alternatives = reclassified_df[reclassified_df['drug_class'] == drug_class]
+        st.subheader("Alternative Drugs in the Same Class")
+        for _, alt_row in alternatives.iterrows():
+            st.markdown("---")
+            st.markdown(f"### Alternative Drug Name: **{alt_row['drug_name']}**")
+            st.markdown(f"- **Manufacturer**: {alt_row['mfg']}")
+            st.markdown(f"- **Acquisition Cost (ACQ)**: {alt_row['acq']}")
+            st.markdown(f"- **Average Wholesale Price (AWP)**: {alt_row['awp']}")
+            st.markdown(f"- **RxCui**: {alt_row['rxcui']}")
         
     else:
         st.warning("No additional data found in the reclassified database.")
-
-if drug_name_input and insurance_code and not filtered_df.empty:
-    st.subheader(f"Latest Billing Details :")
-
-    # Display selected drug details
-    first_valid_result = filtered_df.iloc[0]
-    st.markdown(f"### Drug Name: **{first_valid_result['Drug Name']}**")
-    st.markdown(f"- **NDC**: {first_valid_result['NDC']}")
-    st.markdown(f"- **Insurance**: {insurance_mapping.get(first_valid_result['Ins'], first_valid_result['Ins'])}")
-    st.markdown(f"- **Quantity**: {first_valid_result['Qty']}")
-    st.markdown(f"- **Net Profit**: {first_valid_result['Net Profit']:.2f}")
-    st.markdown(f"- **Copay**: {first_valid_result['Pat Pay']}")
-    st.markdown(f"- **Insurance Pay**: {first_valid_result['Ins Pay']}")
-    st.markdown(f"- **Acquisition Cost**: {first_valid_result['ACQ']}")
-    st.markdown(f"- **Class**: {first_valid_result['class']}")
-    st.markdown(f"- **Script**: {first_valid_result['Script']}")
-    st.markdown(f"- **Date**: {first_valid_result['Date'].strftime('%m/%d/%Y') if pd.notnull(first_valid_result['Date']) else 'Not Available'}")
-    st.markdown("---")
-
-    # Find alternatives by class
-    drug_class = first_valid_result['class']
-    if drug_class.lower() != 'other':
-        # Get the latest entry for each alternative drug name
-        alternatives = (df[(df['class'] == drug_class) & (df['Drug Name'] != first_valid_result['Drug Name'])]
-                        .sort_values(by='Date', ascending=False)
-                        .drop_duplicates(subset=['Drug Name']))
-
-        # If no alternatives in the main dataset, fetch from reclassified dataset
-        if alternatives.empty:
-            alternatives = (reclassified_df[reclassified_df['drug_class'] == drug_class]
-                            .drop_duplicates(subset=['drug_name']))
-
-        st.subheader("Alternative Drugs in the Same Class")
-        st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
-
-        # Sorting options
-        sort_option = st.selectbox("Sort Alternatives By:", ["Highest Net Profit", "Lowest Copay"])
-        if sort_option == "Highest Net Profit" and 'Net Profit' in alternatives.columns:
-            alternatives = alternatives.sort_values(by="Net Profit", ascending=False)
-        elif sort_option == "Lowest Copay" and 'Pat Pay' in alternatives.columns:
-            alternatives = alternatives.sort_values(by="Pat Pay", ascending=True)
-
-        # Display alternatives
-        for _, alt_row in alternatives.iterrows():
-            st.markdown("---")
-            st.markdown(f"### Alternative Drug Name: **{alt_row.get('Drug Name', alt_row.get('drug_name', 'N/A'))}**")
-            st.markdown(f"- **Class**: {alt_row.get('class', alt_row.get('drug_class', 'N/A'))}")
-            st.markdown(f"- **Copay**: {alt_row.get('Pat Pay', 'N/A')}")
-            st.markdown(f"- **Insurance Pay**: {alt_row.get('Ins Pay', 'N/A')}")
-            st.markdown(f"- **Acquisition Cost**: {alt_row.get('ACQ', alt_row.get('acq', 'N/A'))}")
-            st.markdown(f"- **Net Profit**: {alt_row.get('Net Profit', 'N/A'):.2f}")
-    else:
-        st.info("No alternatives available for drugs in the 'Other' class.")
