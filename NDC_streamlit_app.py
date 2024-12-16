@@ -122,7 +122,9 @@ if drug_name_input and ndc_input and filtered_df.empty:
 
         # Find alternatives by class
         drug_class = first_reclassified_result['drug_class']
-        alternatives = reclassified_df[(reclassified_df['drug_class'] == drug_class) & (reclassified_df['drug_name'] != drug_name_input)]
+        alt_reclassified = reclassified_df[(reclassified_df['drug_class'] == drug_class) & (reclassified_df['drug_name'] != drug_name_input)]
+        alt_original = df[(df['class'] == drug_class) & (df['Drug Name'] != drug_name_input)]
+        alternatives = pd.concat([alt_reclassified, alt_original], ignore_index=True)
 
         st.subheader("Alternative Drugs in the Same Class")
         st.markdown(f"**Found {len(alternatives)} alternatives in the same class.**")
@@ -130,18 +132,24 @@ if drug_name_input and ndc_input and filtered_df.empty:
         # Sorting options
         sort_option = st.selectbox("Sort Alternatives By:", ["Lowest Acquisition Cost", "Alphabetical Drug Name"])
         if sort_option == "Lowest Acquisition Cost":
-            alternatives = alternatives.sort_values(by="acq", ascending=True)
+            alternatives = alternatives.sort_values(by="acq", ascending=True, errors='ignore')
         elif sort_option == "Alphabetical Drug Name":
-            alternatives = alternatives.sort_values(by="drug_name")
+            alternatives = alternatives.sort_values(by="drug_name", errors='ignore')
 
         # Display alternatives
         for _, alt_row in alternatives.iterrows():
             st.markdown("---")
-            st.markdown(f"### Alternative Drug Name: **{alt_row['drug_name']}**")
-            st.markdown(f"- **Class**: {alt_row['drug_class']}")
-            st.markdown(f"- **Manufacturer (MFG)**: {alt_row['mfg']}")
-            st.markdown(f"- **Acquisition Cost (ACQ)**: {alt_row['acq']}")
-            st.markdown(f"- **Average Wholesale Price (AWP)**: {alt_row['awp']}")
-            st.markdown(f"- **RxCui**: {alt_row['rxcui']}")
+            drug_name_display = alt_row.get('drug_name', alt_row.get('Drug Name', 'N/A'))
+            drug_class_display = alt_row.get('drug_class', alt_row.get('class', 'N/A'))
+            mfg_display = alt_row.get('mfg', 'N/A')
+            acq_display = alt_row.get('acq', alt_row.get('ACQ', 'N/A'))
+            awp_display = alt_row.get('awp', 'N/A')
+            rxcui_display = alt_row.get('rxcui', alt_row.get('RxCui', 'N/A'))
+            st.markdown(f"### Alternative Drug Name: **{drug_name_display}**")
+            st.markdown(f"- **Class**: {drug_class_display}")
+            st.markdown(f"- **Manufacturer (MFG)**: {mfg_display}")
+            st.markdown(f"- **Acquisition Cost (ACQ)**: {acq_display}")
+            st.markdown(f"- **Average Wholesale Price (AWP)**: {awp_display}")
+            st.markdown(f"- **RxCui**: {rxcui_display}")
     else:
         st.warning("No additional data found in the reclassified database.")
